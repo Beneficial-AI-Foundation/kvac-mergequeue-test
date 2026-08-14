@@ -1471,6 +1471,44 @@
       ]
     },
     {
+      "file": "KVAC/Framework/Extractability.lean",
+      "module_refs": [
+        "§4.4",
+        "Definition 4.5",
+        "Figure 8"
+      ],
+      "decls": [
+        {
+          "name": "Extractor",
+          "kind": "structure",
+          "file": "KVAC/Framework/Extractability.lean",
+          "line": 29,
+          "refs": [
+            "Definition 4.5"
+          ],
+          "has_sorry": false
+        },
+        {
+          "name": "EXTQuery",
+          "kind": "inductive",
+          "file": "KVAC/Framework/Extractability.lean",
+          "line": 44,
+          "refs": [
+            "Figure 8"
+          ],
+          "has_sorry": false
+        },
+        {
+          "name": "EXTOracleSpec",
+          "kind": "def",
+          "file": "KVAC/Framework/Extractability.lean",
+          "line": 55,
+          "refs": [],
+          "has_sorry": false
+        }
+      ]
+    },
+    {
       "file": "KVAC/Framework/PredicateFamily.lean",
       "module_refs": [
         "Definition 4.1",
@@ -1546,7 +1584,7 @@
           "name": "KVAC",
           "kind": "structure",
           "file": "KVAC/Framework.lean",
-          "line": 66,
+          "line": 68,
           "refs": [
             "Definition 4.2"
           ],
