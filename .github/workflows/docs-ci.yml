@@ -1,12 +1,33 @@
 name: Docs CI
 
-# STUB for merge-queue testing (kvac-mergequeue-test only).
-# Real repo runs the heavy Verso+blueprint build here; this stub is fast so we
-# can exercise the merge queue's gating without compiling anything. It triggers
-# on merge_group (the queue candidate) and fails iff docs/FAIL_MARKER exists, so
-# a test PR can force either outcome.
+# Additive shape (Jin's #102 proposal), stubbed for kvac-mergequeue-test only.
+#
+# Triggers on BOTH `pull_request` (fast PR-time feedback while an author is
+# iterating) and `merge_group` (the queue candidate, the actual merge gate).
+# There is deliberately no top-level `paths:` filter: a *required* check behind
+# a paths filter never reports on a PR that touches no matching path, so the PR
+# waits on a check that will never arrive. Instead a cheap in-job path gate
+# decides whether to do the heavy work, and the job always reports a conclusion,
+# so the required check always resolves.
+#
+# `concurrency` cancels a superseded `pull_request` run when the author pushes
+# again; queue and manual runs are never cancelled.
+#
+# The real repo would run the Verso + blueprint build here. This stub is fast so
+# we can exercise the queue's gating without compiling: it fails iff
+# `docs/FAIL_MARKER` exists on the evaluated tree, letting a test PR force either
+# outcome.
 on:
+  pull_request:
   merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   docs:
@@ -14,10 +35,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Stub docs check
+        with:
+          fetch-depth: 0
+
+      - name: Path gate
+        id: gate
         run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "event=${{ github.event_name }} -> gate open, running full check"
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          base='${{ github.event.pull_request.base.sha }}'
+          head='${{ github.event.pull_request.head.sha }}'
+          changed="$(git diff --name-only "$base" "$head" || true)"
+          echo "changed files:"; printf '%s\n' "$changed"
+          if printf '%s\n' "$changed" | grep -qE '^(docs/|KVAC/|KVAC\.lean|scripts/|lakefile\.toml|lake-manifest\.json|lean-toolchain|\.github/workflows/docs-ci\.yml)'; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build docs and check coverage (stub)
+        run: |
+          if [ "${{ steps.gate.outputs.relevant }}" != "true" ]; then
+            echo "no docs-relevant changes -> skipping heavy build, reporting success"
+            exit 0
+          fi
           if [ -f docs/FAIL_MARKER ]; then
-            echo "FAIL_MARKER present on the merge candidate — failing the docs check"
+            echo "FAIL_MARKER present on the evaluated tree -> failing the docs check"
             exit 1
           fi
           echo "docs check passed (stub)"
