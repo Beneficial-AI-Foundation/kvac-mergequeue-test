@@ -85,3 +85,5 @@ Per-track status and dependency graph in [`docs/TRACKS.md`](docs/TRACKS.md).
 [#19]: https://github.com/Beneficial-AI-Foundation/KeyedVerificationAnonymousCredential-model/issues/19
 [#20]: https://github.com/Beneficial-AI-Foundation/KeyedVerificationAnonymousCredential-model/issues/20
 [#21]: https://github.com/Beneficial-AI-Foundation/KeyedVerificationAnonymousCredential-model/issues/21
+
+<!-- merge-queue test: pass path -->
